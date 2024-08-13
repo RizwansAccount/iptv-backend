@@ -7,6 +7,7 @@ import fileRouter from './src/routes/fileRouter.js';
 import seriesRouter from './src/routes/seriesRouter.js';
 import genreSeriesRouter from './src/routes/genreSeriesRouter.js';
 import seasonRouter from './src/routes/seasonRouter.js';
+import episodeRouter from './src/routes/episodeRouter.js';
 
 dotenv.config();
 
@@ -24,5 +25,6 @@ app.use('/file', fileRouter);
 app.use('/series', seriesRouter);
 app.use('/genre-series', genreSeriesRouter);
 app.use('/season', seasonRouter);
+app.use('/episode', episodeRouter);
 
 app.listen(port, ()=> `app is running on port ${port}`)
