@@ -4,6 +4,7 @@ import connectDB from './src/config/dbConnection.js';
 import userRouter from './src/routes/userRouter.js';
 import genreRouter from './src/routes/genreRouter.js';
 import fileRouter from './src/routes/fileRouter.js';
+import seriesRouter from './src/routes/seriesRouter.js';
 
 dotenv.config();
 
@@ -18,5 +19,6 @@ connectDB();
 app.use('/user', userRouter);
 app.use('/genre', genreRouter);
 app.use('/file', fileRouter);
+app.use('/series', seriesRouter);
 
 app.listen(port, ()=> `app is running on port ${port}`)
