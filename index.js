@@ -20,7 +20,7 @@ app.use(express.urlencoded({ extended : true }));
 
 connectDB();
 
-app.use('/user', userRouter);
+app.use('/users', userRouter);
 app.use('/genre', genreRouter);
 app.use('/file', fileRouter);
 app.use('/series', seriesRouter);

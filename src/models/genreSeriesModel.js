@@ -1,8 +1,8 @@
 import mongoose from "mongoose";
 
 const schemaStructure = {
-    genre_id : { type : mongoose.SchemaTypes.ObjectId, required : true, ref : 'Genre' },
-    series_id : { type : mongoose.SchemaTypes.ObjectId, required : true, ref : 'Series' },
+    genre_id : { type : mongoose.Schema.Types.ObjectId, required : true, ref : 'Genre' },
+    series_id : { type : mongoose.Schema.Types.ObjectId, required : true, ref : 'Series' },
     is_deleted : { type : Boolean, default : false }
 };
 

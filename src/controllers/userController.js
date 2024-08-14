@@ -1,7 +1,18 @@
 import { deleteResponseSuccess, errorResponse, getResponseSuccess, postResponseSuccess, updateResponseSuccess } from "../config/responses.js";
 import userModel from '../models/userModel.js';
+import streamModel from '../models/streamModel.js';
 import passwordHash from "password-hash";
 import jwt from 'jsonwebtoken';
+import mongoose from "mongoose";
+
+const getAllUsers = async(req, res)=>{
+    try {
+        const data = await userModel.find({}, {is_deleted : 0, __v : 0, password : 0});
+        getResponseSuccess({res, data, message : 'all users fetch successfully!'})
+    } catch ({message}) {
+        errorResponse({res, message});
+    }
+};
 
 const createUser =async(req, res)=>{
     try {
@@ -56,6 +67,82 @@ const getUser =async(req, res)=>{
     }
 };
 
+const getUserAllStreams =async(req, res)=>{
+    try {
+        const id = req.params.id;
+        const data = await userModel.aggregate([
+            {
+                $match : { _id : new mongoose.Types.ObjectId(id), is_deleted : false }
+            },
+            {
+                $lookup : {
+                    from : 'streams',
+                    localField : '_id',
+                    foreignField : 'user_id',
+                    as : 'streams' 
+                }
+            },
+            {
+                $project : {
+                    '_id': 0,
+                    'first_name': 0,
+                    'last_name': 0,
+                    'email': 0,
+                    'password': 0,
+                    'is_deleted' : 0,
+                    '__v': 0,
+                    'streams.is_deleted' : 0,
+                    'streams.__v': 0
+                }
+            }
+        ]);
+    
+        getResponseSuccess({res, data : data?.[0], message : 'user all streams fetch successfully!'});
+    } catch ({message}) {
+        errorResponse({res, message})
+    }
+};
+
+const getUserStreamByStreamId =async(req, res)=>{
+    try {
+        const userId = req.params.id;
+        const streamId = req.params.streamId;
+        const data = await userModel.aggregate([
+            {
+                $match : { _id : new mongoose.Types.ObjectId(userId), is_deleted : false }
+            },
+            {
+                $lookup : {
+                    from : 'streams',
+                    localField: '_id',
+                    foreignField : 'user_id',
+                    as : 'streams'
+                }
+            },
+            {
+                $unwind: '$streams'
+            },
+            {
+                $match: { 'streams._id': new mongoose.Types.ObjectId(streamId) }
+            },
+            {
+                $project: {
+                    stream: {
+                        _id : '$streams._id',
+                        episode_id: '$streams.episode_id',
+                        user_id: '$streams.user_id',
+                        time: '$streams.time',
+                    },
+                    '_id' :0,
+                }
+            }
+        ]);
+        getResponseSuccess({res, data : data?.[0], message : 'get stream of a user fetch successfully!'})
+    } catch ({message}) {
+        errorResponse({res, message})
+    }
+};
+
 const updateUser =async(req, res)=>{
     try {
         const id = req.params.id;
@@ -86,4 +173,23 @@ const deleteUser =async(req, res)=>{
     }
 };
 
-export { createUser, getUser, updateUser, deleteUser, loginUser  };
+const deleteUserStreamById =async(req, res)=>{
+    try {
+        const userId = req.params.id;
+        const streamId = req.params.streamId;
+
+        const stream = await streamModel.findOne({ _id: streamId, user_id: userId });
+        if (!stream) {
+            return errorResponse({ res, message: 'Stream not found or does not belong to the user' });
+        };
+        await streamModel.findByIdAndUpdate(streamId, { is_deleted : true });
+        deleteResponseSuccess({ res, message: 'Stream deleted successfully' });
+    
+    } catch ({message}) {
+        errorResponse({res, message})
+    }
+};
+
+export { createUser, getUser, updateUser, deleteUser, loginUser, getAllUsers, getUserAllStreams,
+    getUserStreamByStreamId, deleteUserStreamById
+ };

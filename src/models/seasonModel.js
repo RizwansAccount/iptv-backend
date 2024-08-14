@@ -3,7 +3,7 @@ import mongoose from "mongoose";
 const schemaStructure = {
     name : { type : String, required : true },
     description : { type : String, required : true },
-    series_id : { type : mongoose.SchemaTypes.ObjectId, required : true, ref : 'Series' },
+    series_id : { type : mongoose.Schema.Types.ObjectId, required : true, ref : 'Series' },
     is_deleted : { type : Boolean, default : false }
 };
 
