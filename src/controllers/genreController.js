@@ -1,5 +1,7 @@
+import mongoose from "mongoose";
 import { deleteResponseSuccess, errorResponse, getResponseSuccess, postResponseSuccess, updateResponseSuccess } from "../config/responses.js";
 import genreModel from '../models/genreModel.js';
+import genreSeriesModel from '../models/genreSeriesModel.js';
 
 const createGenre =async(req, res)=>{
     try {
@@ -9,6 +11,15 @@ const createGenre =async(req, res)=>{
 
     } catch ({message}) {
         errorResponse({res, message});
+    }
+};
+
+const getAllGenre =async(req, res)=>{
+    try {
+        const data = await genreModel.find({ is_deleted : false }, { is_deleted : 0, __v : 0 });
+        getResponseSuccess({res, data, message : 'all genre fetch successfully!'});
+    } catch ({message}) {
+        errorResponse({res, message})
     }
 };
 
@@ -26,6 +37,115 @@ const getGenre =async(req, res)=>{
 
     } catch ({message}) {
         errorResponse({res, message});
+    }
+};
+
+const getAllSeriesByGenreId = async (req, res) => {
+    try {
+        const id = req.params.id;
+        const data = await genreSeriesModel.aggregate([
+            {
+                $match: { genre_id: new mongoose.Types.ObjectId(id), is_deleted: false }
+            },
+            {
+                $lookup: {
+                    from: 'series',
+                    localField: 'series_id',
+                    foreignField: '_id',
+                    as: 'series',
+                }
+            },
+            {
+                $unwind: '$series'
+            },
+            {
+                $group: {
+                    _id: null,
+                    series: {
+                        $push: {
+                            _id: '$series._id',
+                            name: '$series.name',
+                            description: '$series.description',
+                            thumbnail_id: '$series.thumbnail_id',
+                            trailer_id: '$series.trailer_id'
+                        }
+                    }
+                }
+            },
+            {
+                $project: {
+                    _id: 0,
+                    series: 1
+                }
+            }
+        ]);
+        
+        getResponseSuccess({res, data: data?.[0], message: 'All series of genre fetched successfully!'})
+    } catch ({message}) {
+        errorResponse({res, message})
+    }
+};
+
+const getAllSeasonsByGenreId =async(req, res) => {
+    try {
+        const id = req.params.id;
+        const data = await genreSeriesModel.aggregate([
+            {
+                $match: { genre_id: new mongoose.Types.ObjectId(id), is_deleted: false }
+            },
+            {
+                $lookup: {
+                    from: 'series',
+                    localField: 'series_id',
+                    foreignField: '_id',
+                    as: 'series',
+                    pipeline : [
+                        {
+                            $lookup : {
+                                from : 'seasons',
+                                localField : '_id',
+                                foreignField : 'series_id',
+                                as :'seasons'
+                            },
+                        },
+                        {
+                            $project : {
+                                'seasons.is_deleted' : 0,
+                                'seasons.__v' : 0   
+                            }
+                        }
+                    ]
+                }
+            },
+            {
+                $unwind: '$series'
+            },
+            {
+                $group: {
+                    _id: null,
+                    series: {
+                        $push: {
+                            _id: '$series._id',
+                            name: '$series.name',
+                            description: '$series.description',
+                            thumbnail_id: '$series.thumbnail_id',
+                            trailer_id: '$series.trailer_id',
+                            seasons : '$series.seasons',
+                        }
+                    }
+                }
+            },
+            {
+                $project: {
+                    '_id': 0,
+                    'series': 1,
+                }
+            }
+        ]);
+        
+        getResponseSuccess({res, data: data?.[0], message: 'All series of genre fetched successfully!'})
+    } catch ({message}) {
+        errorResponse({res, message})
     }
 };
 
@@ -57,4 +177,4 @@ const deleteGenre =async(req, res)=>{
     }
 };
 
-export { createGenre, getGenre, updateGenre, deleteGenre  };
+export { createGenre, getGenre, updateGenre, deleteGenre, getAllGenre, getAllSeriesByGenreId, getAllSeasonsByGenreId };

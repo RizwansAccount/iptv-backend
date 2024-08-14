@@ -21,7 +21,7 @@ app.use(express.urlencoded({ extended : true }));
 connectDB();
 
 app.use('/users', userRouter);
-app.use('/genre', genreRouter);
+app.use('/genres', genreRouter);
 app.use('/file', fileRouter);
 app.use('/series', seriesRouter);
 app.use('/genre-series', genreSeriesRouter);
