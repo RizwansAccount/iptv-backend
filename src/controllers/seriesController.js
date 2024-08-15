@@ -1,3 +1,4 @@
+import mongoose from "mongoose";
 import { deleteResponseSuccess, errorResponse, getResponseSuccess, postResponseSuccess, updateResponseSuccess } from "../config/responses.js";
 import seriesModel from '../models/seriesModel.js';
 
@@ -12,6 +13,15 @@ const createSeries =async(req, res)=>{
     }
 };
 
+const getAllSeries =async(req, res)=>{
+    try {
+        const data = await seriesModel.find({ is_deleted : false }, { is_deleted : 0, __v : 0 });
+        getResponseSuccess({ res, data, message: 'all series fetch successfully' })
+    } catch ({message}) {
+        errorResponse({res, message})
+    }
+};
+
 const getSeries =async(req, res)=>{
     try {
         const id = req.params.id;
@@ -22,6 +32,100 @@ const getSeries =async(req, res)=>{
         getResponseSuccess({res, data, message : 'series fetch successfully'});
     } catch ({message}) {
         errorResponse({res, message});
+    }
+};
+
+const getAllSeasonsBySeriesId =async(req, res)=>{
+    try {
+        const id = req.params.id;
+        const data = await seriesModel.aggregate([
+            {
+                $match : { _id : new mongoose.Types.ObjectId(id), is_deleted : false, }
+            },
+            {
+                $lookup: {
+                    from :'seasons',
+                    localField: '_id',
+                    foreignField:'series_id',
+                    as : 'seasons'
+                },
+            },
+            {
+                $project : {
+                    seasons: {
+                        $map: {
+                            input: '$seasons',
+                            as: 'season',
+                            in: {
+                                _id: '$$season._id',
+                                name: '$$season.name',
+                                description: '$$season.description',
+                                series_id: '$$season.series_id'
+                            }
+                        }
+                    },
+                    '_id' : 0
+                }
+            }
+        ]);
+        getResponseSuccess({res, data : data?.[0], message : 'all seasons fetch successfully by series id'})
+    } catch ({message}) {
+        errorResponse({res, message})
+    }
+};
+
+const getAllEpisodesBySeriesId =async(req, res)=>{
+    try {
+        const id = req.params.id;
+        const data = await seriesModel.aggregate([
+            {
+                $match : { _id : new mongoose.Types.ObjectId(id), is_deleted : false, }
+            },
+            {
+                $lookup: {
+                    from :'seasons',
+                    localField: '_id',
+                    foreignField:'series_id',
+                    as : 'seasons',
+                },
+            },
+            {
+                $unwind : '$seasons' 
+            }, 
+            {
+                $lookup : {
+                    from : 'episodes',
+                    localField : 'seasons._id',
+                    foreignField: 'season_id',
+                    as : 'episodes'
+                }
+            },
+            {
+                $unwind : '$episodes'
+            },
+            {
+                $group: {
+                    _id: '$_id',
+                    episodes: {
+                        $push: {
+                            _id: '$episodes._id',
+                            name: '$episodes.name',
+                            description: '$episodes.description',
+                            season_id: '$seasons._id',
+                            season_name: '$seasons.name'
+                        }
+                    }
+                }
+            },
+            {
+                $project : {
+                    _id : 0
+                }
+            }
+        ]);
+        getResponseSuccess({res, data : data?.[0] , message : 'all seasons fetch successfully by series id'})
+    } catch ({message}) {
+        errorResponse({res, message})
     }
 };
 
@@ -50,4 +154,4 @@ const deleteSeries =async(req, res)=>{
     }
 };
 
-export { createSeries, getSeries, updateSeries, deleteSeries  };
+export { createSeries, getSeries, updateSeries, deleteSeries, getAllSeries, getAllSeasonsBySeriesId, getAllEpisodesBySeriesId };
