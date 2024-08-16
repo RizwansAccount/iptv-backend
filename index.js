@@ -25,7 +25,7 @@ app.use('/genres', genreRouter);
 app.use('/file', fileRouter);
 app.use('/series', seriesRouter);
 app.use('/genre-series', genreSeriesRouter);
-app.use('/season', seasonRouter);
+app.use('/seasons', seasonRouter);
 app.use('/episode', episodeRouter);
 app.use('/stream', streamRouter);
 

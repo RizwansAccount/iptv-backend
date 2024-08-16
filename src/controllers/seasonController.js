@@ -1,3 +1,4 @@
+import mongoose from "mongoose";
 import { deleteResponseSuccess, errorResponse, getResponseSuccess, postResponseSuccess, updateResponseSuccess } from "../config/responses.js";
 import seasonModel from '../models/seasonModel.js';
 
@@ -9,6 +10,15 @@ const createSeason =async(req, res)=>{
 
     } catch ({message}) {
         errorResponse({res, message});
+    }
+};
+
+const getAllSeasons=async(req, res)=>{
+    try {
+        const data = await seasonModel.find({is_deleted : false}, {is_deleted : 0, __v :0});
+        getResponseSuccess({res, data, message : 'fetch all seasons successfully!'})
+    } catch ({message}) {
+        errorResponse({res, message})
     }
 };
 
@@ -26,6 +36,44 @@ const getSeason =async(req, res)=>{
 
     } catch ({message}) {
         errorResponse({res, message});
+    }
+};
+
+const getAllEpisodesBySeasonId =async(req, res)=>{
+    try {
+        const id = req.params.id;
+        const data = await seasonModel.aggregate([
+            {
+                $match : { _id : new mongoose.Types.ObjectId(id), is_deleted : false }
+            },
+            {
+                $lookup : {
+                    from : 'episodes',
+                    localField : '_id',
+                    foreignField : 'season_id',
+                    as : 'episodes'
+                }
+            },
+            {
+                $project : {
+                    episodes : {
+                        $map : {
+                            input : '$episodes',
+                            as : 'episode',
+                            in : {
+                                '_id' :  '$$episode._id',
+                                'name' : '$$episode.name',
+                                'description' : '$$episode.description'
+                            }
+                        }
+                    },
+                    _id : 0
+                }
+            }
+        ]);
+        getResponseSuccess({res, data : data?.[0], message : 'fetch all episodes of this season successfully!'})
+    } catch ({message}) {
+        errorResponse({res, message})
     }
 };
 
@@ -57,4 +105,4 @@ const deleteSeason =async(req, res)=>{
     }
 };
 
-export { createSeason, getSeason, updateSeason, deleteSeason  };
+export { createSeason, getSeason, updateSeason, deleteSeason, getAllSeasons, getAllEpisodesBySeasonId  };
