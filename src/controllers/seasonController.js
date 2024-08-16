@@ -57,6 +57,18 @@ const getAllEpisodesBySeasonId =async(req, res)=>{
             {
                 $project : {
                     episodes : {
+                        $filter : {
+                            input : '$episodes',
+                            as : 'episode',
+                            cond : { $eq: ['$$episode.is_deleted', false] }
+                        }
+                    },
+                    _id : 0
+                }
+            },
+            {
+                $project : {
+                    episodes : {
                         $map : {
                             input : '$episodes',
                             as : 'episode',
