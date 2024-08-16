@@ -84,15 +84,30 @@ const getUserAllStreams =async(req, res)=>{
             },
             {
                 $project : {
-                    '_id': 0,
-                    'first_name': 0,
-                    'last_name': 0,
-                    'email': 0,
-                    'password': 0,
-                    'is_deleted' : 0,
-                    '__v': 0,
-                    'streams.is_deleted' : 0,
-                    'streams.__v': 0
+                    streams : {
+                        $filter : {
+                            input : '$streams',
+                            as : 'stream',
+                            cond : { $eq : ['$$stream.is_deleted', false] }
+                        }
+                    },
+                    _id : 0
+                }
+            },
+            {
+                $project : {
+                   streams : {
+                    $map : {
+                        input : '$streams',
+                        as : 'stream',
+                        in : {
+                            '_id' : '$$stream._id',
+                            'episode_id' : '$$stream.episode_id',
+                            'user_id' : '$$stream.user_id',
+                            'time' : '$$stream.time'
+                        }
+                    }
+                   }
                 }
             }
         ]);
@@ -126,6 +141,9 @@ const getUserStreamByStreamId =async(req, res)=>{
                 $match: { 'streams._id': new mongoose.Types.ObjectId(streamId) }
             },
             {
+                $match : { 'streams.is_deleted' : false }
+            },
+            {
                 $project: {
                     stream: {
                         _id : '$streams._id',
@@ -137,7 +155,11 @@ const getUserStreamByStreamId =async(req, res)=>{
                 }
             }
         ]);
-        getResponseSuccess({res, data : data?.[0], message : 'get stream of a user fetch successfully!'})
+        if(data?.length > 0) {
+            getResponseSuccess({res, data : data?.[0], message : 'get stream of a user fetch successfully!'})
+        } else {
+            res.json({success : true, message : 'stream does not exist'})
+        }
     } catch ({message}) {
         errorResponse({res, message})
     }
