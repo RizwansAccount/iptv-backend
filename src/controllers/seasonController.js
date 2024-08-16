@@ -105,4 +105,4 @@ const deleteSeason =async(req, res)=>{
     }
 };
 
-export { createSeason, getSeason, updateSeason, deleteSeason, getAllSeasons, getAllEpisodesBySeasonId  };
+export { createSeason, getSeason, updateSeason, deleteSeason, getAllSeasons, getAllEpisodesBySeasonId };
