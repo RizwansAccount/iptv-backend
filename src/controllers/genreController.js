@@ -97,7 +97,8 @@ const getAllSeriesByGenreId = async (req, res) => {
     }
 };
 
-const getAllSeasonsByGenreId =async(req, res) => {
+
+const getAllSeasonsByGenreId = async (req, res) => {
     try {
         const id = req.params.id;
         const data = await genreSeriesModel.aggregate([
@@ -109,56 +110,114 @@ const getAllSeasonsByGenreId =async(req, res) => {
                     from: 'series',
                     localField: 'series_id',
                     foreignField: '_id',
-                    as: 'series',
-                    pipeline : [
-                        {
-                            $lookup : {
-                                from : 'seasons',
-                                localField : '_id',
-                                foreignField : 'series_id',
-                                as :'seasons'
-                            },
-                        },
-                        {
-                            $project : {
-                                'seasons.is_deleted' : 0,
-                                'seasons.__v' : 0   
-                            }
-                        }
-                    ]
+                    as: 'series'
                 }
             },
             {
                 $unwind: '$series'
             },
             {
+                $match: { 'series.is_deleted': false }
+            },
+            {
+                $lookup: {
+                    from: 'seasons',
+                    localField: 'series._id',
+                    foreignField: 'series_id',
+                    as: 'seasons'
+                }
+            },
+            {
+                $unwind: '$seasons'
+            },
+            {
+                $match: { 'seasons.is_deleted': false }
+            },
+            {
                 $group: {
                     _id: null,
-                    series: {
-                        $push: {
-                            _id: '$series._id',
-                            name: '$series.name',
-                            description: '$series.description',
-                            thumbnail_id: '$series.thumbnail_id',
-                            trailer_id: '$series.trailer_id',
-                            seasons : '$series.seasons',
-                        }
-                    }
+                    seasons: { $push: '$seasons' }
                 }
             },
             {
                 $project: {
-                    '_id': 0,
-                    'series': 1,
+                    seasons: {
+                        $map : {
+                            input : '$seasons',
+                            as : 'season',
+                            in : {
+                                '_id' : '$$season._id',
+                                'name' : '$$season.name',
+                                'description' : '$$season.description',
+                            }
+                        }
+                    }
                 }
             }
         ]);
         
-        getResponseSuccess({res, data: data?.[0], message: 'All series of genre fetched successfully!'})
+        const seasons = data.length > 0 ? data[0].seasons : [];
+        
+        getResponseSuccess({res, data: { seasons }, message: 'All seasons of genre fetched successfully!'})
     } catch ({message}) {
         errorResponse({res, message})
     }
 };
+// const getAllSeasonsByGenreId =async(req, res) => {
+//     try {
+//         const id = req.params.id;
+//         const data = await genreSeriesModel.aggregate([
+//             {
+//                 $match: { genre_id: new mongoose.Types.ObjectId(id), is_deleted: false }
+//             },
+//             {
+//                 $lookup: {
+//                     from: 'series',
+//                     localField: 'series_id',
+//                     foreignField: '_id',
+//                     as: 'series',
+//                     pipeline : [
+//                         {
+//                             $lookup : {
+//                                 from : 'seasons',
+//                                 localField : '_id',
+//                                 foreignField : 'series_id',
+//                                 as : 'seasons'
+//                             }
+//                         },
+//                         {
+//                             $project : {
+//                                 seasons : {
+//                                     $filter : {
+//                                         input : '$seasons',
+//                                         as : 'season',
+//                                         cond : { $eq : [ '$$season.is_deleted', false ] }
+//                                     }
+//                                 }
+//                             }
+//                         }
+//                     ]
+//                 }
+//             },
+//             {
+//                 $project: {
+//                     series: {
+//                         $filter: {
+//                             input: '$series',
+//                             as: 'series',
+//                             cond: { $ne: ['$$series.seasons', []] }
+//                         }
+//                     },
+//                     _id: 0
+//                 }
+//             },
+//         ]);
+        
+//         getResponseSuccess({res, data: data, message: 'All series of genre fetched successfully!'})
+//     } catch ({message}) {
+//         errorResponse({res, message})
+//     }
+// };
 
 const updateGenre =async(req, res)=>{
     try {
