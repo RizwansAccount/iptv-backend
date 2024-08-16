@@ -52,6 +52,17 @@ const getAllSeasonsBySeriesId =async(req, res)=>{
             },
             {
                 $project : {
+                    seasons : {
+                        $filter : {
+                            input : '$seasons',
+                            as : 'season',
+                            cond : { $eq : [ '$$season.is_deleted', false ] }
+                        }
+                    }
+                }
+            },
+            {
+                $project : {
                     seasons: {
                         $map: {
                             input: '$seasons',
@@ -68,7 +79,11 @@ const getAllSeasonsBySeriesId =async(req, res)=>{
                 }
             }
         ]);
-        getResponseSuccess({res, data : data?.[0], message : 'all seasons fetch successfully by series id'})
+        if(data?.length > 0) {
+            getResponseSuccess({res, data : data?.[0], message : 'all seasons fetch successfully by series id'})
+        } else  {
+            res.json({ success : true, message : 'seasons does not exist' })
+        }
     } catch ({message}) {
         errorResponse({res, message})
     }
@@ -98,6 +113,17 @@ const getAllEpisodesBySeriesId =async(req, res)=>{
                     localField : 'seasons._id',
                     foreignField: 'season_id',
                     as : 'episodes'
+                }
+            },
+            {
+                $project : {
+                    episodes : {
+                        $filter : {
+                            input : '$episodes',
+                            as : 'episode',
+                            cond : { $eq : [ '$$episode.is_deleted', false ] }
+                        }
+                    }
                 }
             },
             {
