@@ -56,6 +56,17 @@ const getAllSeriesByGenreId = async (req, res) => {
                 }
             },
             {
+                $project : {
+                    series : {
+                        $filter : {
+                            input : '$series',
+                            as : 'series',
+                            cond : { $eq : [ '$$series.is_deleted', false ] }
+                        }
+                    }
+                }
+            },
+            {
                 $unwind: '$series'
             },
             {
