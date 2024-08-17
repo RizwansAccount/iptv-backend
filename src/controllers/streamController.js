@@ -1,3 +1,4 @@
+import mongoose from "mongoose";
 import { deleteResponseSuccess, errorResponse, getResponseSuccess, postResponseSuccess, updateResponseSuccess } from "../config/responses.js";
 import streamModel from '../models/streamModel.js';
 
@@ -12,6 +13,15 @@ const createStream =async(req, res)=>{
     }
 };
 
+const getAllStreams =async(req, res)=>{
+    try {
+        const data = await streamModel.find({is_deleted : false}, { is_deleted : 0, __v: 0 });
+        getResponseSuccess({res, data, message : 'fetch all streams successfully!'})
+    } catch ({message}) {
+        errorResponse({res, message});
+    }
+};
+
 const getStream =async(req, res)=>{
     try {
         const id = req.params.id;
@@ -21,6 +31,331 @@ const getStream =async(req, res)=>{
         };
         getResponseSuccess({res, data, message : 'stream fetch successfully'});
 
+    } catch ({message}) {
+        errorResponse({res, message});
+    }
+};
+
+const getUserByStreamId =async(req, res)=>{
+    try {
+        const id = req.params.id;
+        const data = await streamModel.aggregate([
+            {
+                $match : { _id : new mongoose.Types.ObjectId(id), is_deleted : false }
+            },
+            {
+                $lookup : {
+                    from : 'users',
+                    localField : 'user_id',
+                    foreignField: '_id',
+                    as : 'user'
+                }
+            },
+            {
+                $unwind : '$user'
+            },
+            {
+                $project : {
+                    user: {
+                        _id: '$user._id',
+                        first_name: '$user.first_name',
+                        last_name: '$user.last_name',
+                        email: '$user.email',
+                    },
+                    '_id' : 0,
+                }
+            },
+        ]);
+        getResponseSuccess({res, data : data?.[0], message : 'user data fetch successfully!'})
+    } catch ({message}) {
+        errorResponse({res, message});
+    }
+};
+
+const getEpisodeByStreamId =async(req, res)=>{
+    try {
+        const id = req.params.id;
+        const data = await streamModel.aggregate([
+            {
+                $match : { _id : new mongoose.Types.ObjectId(id), is_deleted : false }
+            },
+            {
+                $lookup : {
+                    from : 'episodes',
+                    localField: 'episode_id',
+                    foreignField : '_id',
+                    as : 'episode',
+                }
+            },
+            {
+                $unwind : '$episode'
+            },
+            {
+                $project : {
+                    episode : {
+                        _id : '$episode._id',
+                        name : '$episode.name',
+                        description : '$episode.description',
+                        season_id : '$episode.season_id',
+                        thumbnail_id : '$episode.thumbnail_id',
+                    },
+                    _id : 0
+                }
+            }
+        ]);
+        getResponseSuccess({res, data : data?.[0], message :'episode of this stream fetch successfully!'})
+    } catch ({message}) {
+        errorResponse({res, message});
+    }
+};
+
+const getSeasonOfEpisodeByStreamId =async(req, res)=>{
+    try {
+        const id = req.params.id;
+        const data = await streamModel.aggregate([
+            {
+                $match : { _id : new mongoose.Types.ObjectId(id), is_deleted : false }
+            },
+            {
+                $lookup : {
+                    from : 'episodes',
+                    localField: 'episode_id',
+                    foreignField : '_id',
+                    as : 'episode',
+                    pipeline: [
+                        {
+                            $match : { 'is_deleted' : false }
+                        },
+                        {
+                            $lookup : {
+                                from : 'seasons',
+                                localField : 'season_id',
+                                foreignField : '_id',
+                                as : 'season'
+                            }
+                        },
+                        {
+                            $unwind : '$season'
+                        },
+                        {
+                            $project : {
+                                'is_deleted' : 0,
+                                '__v' : 0,
+                                'season.is_deleted' : 0,
+                                'season.__v' : 0,
+                            }
+                        }
+                    ]
+                }
+            },
+            {
+                $unwind : '$episode'
+            },
+            {
+                $project : {
+                    season : '$episode.season',
+                    _id : 0
+                }
+            }
+
+        ]);
+        getResponseSuccess({res, data : data?.[0], message : 'get season by stream id successfully!'})
+    } catch ({message}) {
+        errorResponse({res, message});
+    }
+};
+
+const getSeriesOfSeasonEpisodeByStreamId =async(req, res)=>{
+    try {
+        const id = req.params.id;
+        const data = await streamModel.aggregate([
+            {
+                $match : { _id : new mongoose.Types.ObjectId(id), is_deleted : false }
+            },
+            {
+                $lookup : {
+                    from : 'episodes',
+                    localField: 'episode_id',
+                    foreignField : '_id',
+                    as : 'episode',
+                    pipeline: [
+                        {
+                            $match : { 'is_deleted' : false }
+                        },
+                        {
+                            $lookup : {
+                                from : 'seasons',
+                                localField : 'season_id',
+                                foreignField : '_id',
+                                as : 'season'
+                            }
+                        },
+                        {
+                            $unwind : '$season'
+                        },
+                        {
+                            $project : {
+                                'is_deleted' : 0,
+                                '__v' : 0,
+                                'season.is_deleted' : 0,
+                                'season.__v' : 0,
+                            }
+                        }
+                    ]
+                }
+            },
+            {
+                $unwind : '$episode'
+            },
+            {
+                $project : {
+                    season : '$episode.season',
+                    _id : 0
+                }
+            },
+            {
+                $lookup : {
+                    from : 'series',
+                    localField : 'season.series_id',
+                    foreignField : '_id',
+                    as : 'series'
+                }
+            },
+            {
+                $project : {
+                    series : '$series'
+                }
+            }
+
+        ]);
+        getResponseSuccess({res, data : data?.[0], message : 'get season by stream id successfully!'})
+    } catch ({message}) {
+        errorResponse({res, message});
+    }
+};
+
+const getGenresOfSeriesOfSeasonEpisodeByStreamId =async(req, res)=>{
+    try {
+        const id = req.params.id;
+        const data = await streamModel.aggregate([
+            {
+                $match : { _id : new mongoose.Types.ObjectId(id), is_deleted : false }
+            },
+            {
+                $lookup : {
+                    from : 'episodes',
+                    localField: 'episode_id',
+                    foreignField : '_id',
+                    as : 'episode',
+                    pipeline: [
+                        {
+                            $match : { 'is_deleted' : false }
+                        },
+                        {
+                            $lookup : {
+                                from : 'seasons',
+                                localField : 'season_id',
+                                foreignField : '_id',
+                                as : 'season'
+                            }
+                        },
+                        {
+                            $unwind : '$season'
+                        },
+                        {
+                            $project : {
+                                'is_deleted' : 0,
+                                '__v' : 0,
+                                'season.is_deleted' : 0,
+                                'season.__v' : 0,
+                            }
+                        }
+                    ]
+                }
+            },
+            {
+                $unwind : '$episode'
+            },
+            {
+                $project : {
+                    season : '$episode.season',
+                    _id : 0
+                }
+            },
+            {
+                $lookup : {
+                    from : 'series',
+                    localField : 'season.series_id',
+                    foreignField : '_id',
+                    as : 'series'
+                }
+            },
+            {
+                $project : {
+                    series : '$series'
+                }
+            },
+            {
+                $lookup : {
+                    from : 'genreseries',
+                    localField: 'series._id',
+                    foreignField:'series_id',
+                    as : 'genre-series',
+                    pipeline : [
+                        {
+                            $lookup : {
+                                from : 'genres',
+                                localField: 'genre_id',
+                                foreignField : '_id',
+                                as : 'genres'
+                            }
+                        },
+                        {
+                            $unwind : '$genres'
+                        },
+                        {
+                            $project : {
+                                genres : {
+                                    '_id' : '$genres._id',
+                                    'name' : '$genres.name'
+                                },
+                                _id : 0
+                            }
+                        },
+                        {
+                            $group : {
+                                _id :  null,
+                                genres : {
+                                    $push : {
+                                        _id : '$genres._id',
+                                        name : '$genres.name',
+                                    }
+                                }
+                            }
+                        },
+                        {
+                            $project : {
+                                _id : 0
+                            }
+                        }
+                    ]
+                }
+            },
+            {
+                $unwind : '$genre-series'
+            },
+            {
+                $project : {
+                    genres : '$genre-series.genres'
+                }
+            }
+
+        ]);
+        if(data?.length > 0) {
+            getResponseSuccess({res, data : data?.[0], message : 'get season by stream id successfully!'})
+        } else  {
+            res.json({success : true, message : 'genres does not exist'})
+        }
     } catch ({message}) {
         errorResponse({res, message});
     }
@@ -52,4 +387,6 @@ const deleteStream =async(req, res)=>{
     }
 };
 
-export { createStream, getStream, updateStream, deleteStream };
+export { createStream, getStream, updateStream, deleteStream, getAllStreams, getUserByStreamId, getEpisodeByStreamId,
+    getSeasonOfEpisodeByStreamId, getSeriesOfSeasonEpisodeByStreamId, getGenresOfSeriesOfSeasonEpisodeByStreamId
+ };

@@ -27,6 +27,6 @@ app.use('/series', seriesRouter);
 app.use('/genre-series', genreSeriesRouter);
 app.use('/seasons', seasonRouter);
 app.use('/episodes', episodeRouter);
-app.use('/stream', streamRouter);
+app.use('/streams', streamRouter);
 
 app.listen(port, ()=> `app is running on port ${port}`)
