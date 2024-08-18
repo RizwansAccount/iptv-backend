@@ -10,7 +10,7 @@ router.post('/', authenticate, validate(episodeValidation.register.bodySchema), 
 
 router.get('/', authenticate, getAllEpisodes);
 router.get('/:id', authenticate, validate(episodeValidation.id.paramsSchema, 'params'), getEpisode);
-router.get('/:id/streams', authenticate, getAllStreamsByEpisodeId);
+router.get('/:id/streams', authenticate, validate(episodeValidation.id.paramsSchema, 'params'), getAllStreamsByEpisodeId);
 
 router.patch('/:id', authenticate, validate(episodeValidation.id.paramsSchema, 'params'), validate(episodeValidation.update.bodySchema), updateEpisode);
 router.delete('/:id', authenticate, validate(episodeValidation.id.paramsSchema, 'params'), deleteEpisode);

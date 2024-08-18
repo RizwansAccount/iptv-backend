@@ -10,7 +10,7 @@ router.post('/', authenticate, validate(seasonValidation.register.bodySchema), c
 
 router.get('/', authenticate, getAllSeasons);
 router.get('/:id', authenticate, validate(seasonValidation.id.paramsSchema, 'params'), getSeason);
-router.get('/:id/episodes', authenticate, getAllEpisodesBySeasonId);
+router.get('/:id/episodes', authenticate, validate(seasonValidation.id.paramsSchema, 'params'), getAllEpisodesBySeasonId);
 
 router.patch('/:id', authenticate, validate(seasonValidation.id.paramsSchema, 'params'), validate(seasonValidation.update.bodySchema), updateSeason);
 router.delete('/:id', authenticate, validate(seasonValidation.id.paramsSchema, 'params'), deleteSeason);

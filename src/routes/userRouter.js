@@ -13,12 +13,12 @@ router.post('/login', validate(userValidation.login.bodySchema), loginUser);
 
 router.get('/', authenticate, getAllUsers);
 router.get('/:id/streams', authenticate, validate(userValidation.id.paramsSchema, 'params'), getUserAllStreams);
-router.get('/:id/streams/:streamId', authenticate, getUserStreamByStreamId);
+router.get('/:id/streams/:streamId', authenticate, validate(userValidation.idAndStreamId.paramsSchema, 'params'), getUserStreamByStreamId);
 router.get('/:id', authenticate, validate(userValidation.id.paramsSchema, 'params'), getUser);
 
 router.patch('/:id', authenticate, validate(userValidation.id.paramsSchema, 'params'), validate(userValidation.update.bodySchema), updateUser);
 
-router.delete('/:id/streams/:streamId', authenticate, deleteUserStreamById);
+router.delete('/:id/streams/:streamId', authenticate, validate(userValidation.idAndStreamId.paramsSchema, 'params'), deleteUserStreamById);
 router.delete('/:id', authenticate, validate(userValidation.id.paramsSchema, 'params'), deleteUser);
 
 export default router;

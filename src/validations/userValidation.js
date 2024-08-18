@@ -8,6 +8,13 @@ export default {
         }),
     },
 
+    idAndStreamId : {
+        paramsSchema : Joi.object().keys({
+            id : Joi.string().required(),
+            streamId : Joi.string().required(),
+        }),
+    },
+
     register : {
         bodySchema : Joi.object().keys({
             first_name : Joi.string().required(),
