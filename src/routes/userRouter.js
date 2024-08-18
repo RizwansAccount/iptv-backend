@@ -12,8 +12,8 @@ router.post('/registration', validate(userValidation.register.bodySchema) ,creat
 router.post('/login', validate(userValidation.login.bodySchema), loginUser);
 
 router.get('/', getAllUsers);
-router.get('/:id/streams', getUserAllStreams);
-router.get('/:id/streams/:streamId', getUserStreamByStreamId);
+router.get('/:id/streams', validate(userValidation.id.paramsSchema, 'params'), getUserAllStreams);
+router.get('/:id/streams/:streamId', validate(userValidation.id.paramsSchema, 'params'), getUserStreamByStreamId);
 router.get('/:id', authenticate, validate(userValidation.id.paramsSchema, 'params'), getUser);
 
 router.patch('/:id', authenticate, validate(userValidation.id.paramsSchema, 'params'), validate(userValidation.update.bodySchema), updateUser);

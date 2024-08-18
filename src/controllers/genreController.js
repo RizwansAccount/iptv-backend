@@ -97,7 +97,6 @@ const getAllSeriesByGenreId = async (req, res) => {
     }
 };
 
-
 const getAllSeasonsByGenreId = async (req, res) => {
     try {
         const id = req.params.id;
@@ -163,61 +162,6 @@ const getAllSeasonsByGenreId = async (req, res) => {
         errorResponse({res, message})
     }
 };
-// const getAllSeasonsByGenreId =async(req, res) => {
-//     try {
-//         const id = req.params.id;
-//         const data = await genreSeriesModel.aggregate([
-//             {
-//                 $match: { genre_id: new mongoose.Types.ObjectId(id), is_deleted: false }
-//             },
-//             {
-//                 $lookup: {
-//                     from: 'series',
-//                     localField: 'series_id',
-//                     foreignField: '_id',
-//                     as: 'series',
-//                     pipeline : [
-//                         {
-//                             $lookup : {
-//                                 from : 'seasons',
-//                                 localField : '_id',
-//                                 foreignField : 'series_id',
-//                                 as : 'seasons'
-//                             }
-//                         },
-//                         {
-//                             $project : {
-//                                 seasons : {
-//                                     $filter : {
-//                                         input : '$seasons',
-//                                         as : 'season',
-//                                         cond : { $eq : [ '$$season.is_deleted', false ] }
-//                                     }
-//                                 }
-//                             }
-//                         }
-//                     ]
-//                 }
-//             },
-//             {
-//                 $project: {
-//                     series: {
-//                         $filter: {
-//                             input: '$series',
-//                             as: 'series',
-//                             cond: { $ne: ['$$series.seasons', []] }
-//                         }
-//                     },
-//                     _id: 0
-//                 }
-//             },
-//         ]);
-        
-//         getResponseSuccess({res, data: data, message: 'All series of genre fetched successfully!'})
-//     } catch ({message}) {
-//         errorResponse({res, message})
-//     }
-// };
 
 const updateGenre =async(req, res)=>{
     try {
