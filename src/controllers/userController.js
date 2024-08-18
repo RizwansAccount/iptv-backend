@@ -60,6 +60,10 @@ const getUser =async(req, res)=>{
 
         const data = await userModel.findOne({ _id : id }, {is_deleted : 0, password : 0, __v : 0});
 
+        if(!data) {
+            errorResponse({res, message : 'user does not exist'})
+        }
+
         getResponseSuccess({res, data, message : 'user fetch successfully'});
 
     } catch ({message}) {
@@ -112,7 +116,7 @@ const getUserAllStreams =async(req, res)=>{
             }
         ]);
 
-        getResponseSuccess({res, data : data?.[0]??[], message : 'user all streams fetch successfully!'});
+        getResponseSuccess({res, data : data?.[0] || { streams : [] }, message : 'user all streams fetch successfully!'});
     
     } catch ({message}) {
         errorResponse({res, message})

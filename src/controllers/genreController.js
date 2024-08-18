@@ -91,7 +91,7 @@ const getAllSeriesByGenreId = async (req, res) => {
             }
         ]);
         
-        getResponseSuccess({res, data: data?.[0], message: 'All series of genre fetched successfully!'})
+        getResponseSuccess({res, data: data?.[0] || { series : [] }, message: 'All series of genre fetched successfully!'})
     } catch ({message}) {
         errorResponse({res, message})
     }

@@ -85,7 +85,7 @@ const getAllEpisodesBySeasonId =async(req, res)=>{
                 }
             }
         ]);
-        getResponseSuccess({res, data : data?.[0], message : 'fetch all episodes of this season successfully!'})
+        getResponseSuccess({res, data : data?.[0] || { episodes : [] }, message : 'fetch all episodes of this season successfully!'})
     } catch ({message}) {
         errorResponse({res, message})
     }

@@ -12,7 +12,7 @@ const createFile =async(req, res)=>{
             path : file?.path,
             size : file?.size,
         };
-        const data = await fileModal.create(body);
+        await fileModal.create(body);
         res.json({success : true, message : 'File upload successfully!'});
 
     } catch ({message}) {

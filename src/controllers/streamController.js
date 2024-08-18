@@ -228,7 +228,7 @@ const getSeriesOfSeasonEpisodeByStreamId =async(req, res)=>{
             }
 
         ]);
-        getResponseSuccess({res, data : data?.[0], message : 'get season by stream id successfully!'})
+        getResponseSuccess({res, data : data?.[0] || { series : [] }, message : 'get season by stream id successfully!'})
     } catch ({message}) {
         errorResponse({res, message});
     }
@@ -351,7 +351,7 @@ const getGenresOfSeriesOfSeasonEpisodeByStreamId =async(req, res)=>{
             }
 
         ]);
-        getResponseSuccess({res, data : data?.[0] ?? { streams : [] }, message : 'get season by stream id successfully!'})
+        getResponseSuccess({res, data : data?.[0] || { genres : [] }, message : 'get genres by stream id successfully!'})
     } catch ({message}) {
         errorResponse({res, message});
     }

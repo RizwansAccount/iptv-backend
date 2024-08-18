@@ -149,7 +149,7 @@ const getAllEpisodesBySeriesId =async(req, res)=>{
                 }
             }
         ]);
-        getResponseSuccess({res, data : data?.[0] , message : 'all seasons fetch successfully by series id'})
+        getResponseSuccess({res, data : data?.[0] || { episodes : [] } , message : 'all seasons fetch successfully by series id'})
     } catch ({message}) {
         errorResponse({res, message})
     }

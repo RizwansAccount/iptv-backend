@@ -82,7 +82,7 @@ const getAllStreamsByEpisodeId = async (req, res) => {
                 }
             }
         ]);
-        getResponseSuccess({ res, data: data?.[0], message: 'get all Streams by episode id' })
+        getResponseSuccess({ res, data: data?.[0] || { streams : [] }, message: 'get all Streams by episode id' })
     } catch ({ message }) {
         errorResponse({ res, message })
     }
