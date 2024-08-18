@@ -1,6 +1,7 @@
 import mongoose from "mongoose";
 import { deleteResponseSuccess, errorResponse, getResponseSuccess, postResponseSuccess, updateResponseSuccess } from "../config/responses.js";
 import seriesModel from '../models/seriesModel.js';
+import paginationPipeline from "../config/paginationPipeline.js";
 
 const createSeries =async(req, res)=>{
     try {
@@ -15,7 +16,9 @@ const createSeries =async(req, res)=>{
 
 const getAllSeries =async(req, res)=>{
     try {
-        const data = await seriesModel.find({ is_deleted : false }, { is_deleted : 0, __v : 0 });
+        const pipeline = paginationPipeline(req);
+        const data = await seriesModel.aggregate(pipeline);
+
         getResponseSuccess({ res, data, message: 'all series fetch successfully' })
     } catch ({message}) {
         errorResponse({res, message})

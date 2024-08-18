@@ -1,6 +1,7 @@
 import mongoose from "mongoose";
 import { deleteResponseSuccess, errorResponse, getResponseSuccess, postResponseSuccess, updateResponseSuccess } from "../config/responses.js";
 import seasonModel from '../models/seasonModel.js';
+import paginationPipeline from "../config/paginationPipeline.js";
 
 const createSeason =async(req, res)=>{
     try {
@@ -15,7 +16,8 @@ const createSeason =async(req, res)=>{
 
 const getAllSeasons=async(req, res)=>{
     try {
-        const data = await seasonModel.find({is_deleted : false}, {is_deleted : 0, __v :0});
+        const pipeline = paginationPipeline(req);
+        const data = await seasonModel.aggregate(pipeline);
         getResponseSuccess({res, data, message : 'fetch all seasons successfully!'})
     } catch ({message}) {
         errorResponse({res, message})
