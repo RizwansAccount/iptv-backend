@@ -5,23 +5,24 @@ import { getStream, createStream, updateStream, deleteStream, getAllStreams, get
     getGenresOfSeriesOfSeasonEpisodeByStreamId
  } from '../controllers/streamController.js';
 import streamValidation from '../validations/streamValidation.js';
+import authenticate from '../middlewares/authenticate.js';
 
 const router = express.Router();
 const paramsIdValidate = validate(streamValidation.id.paramsSchema, 'params');
 
-router.post('/', validate(streamValidation.register.bodySchema), createStream);
+router.post('/', authenticate, validate(streamValidation.register.bodySchema), createStream);
 
-router.get('/', getAllStreams);
-router.get('/:id', paramsIdValidate, getStream);
+router.get('/', authenticate, getAllStreams);
+router.get('/:id', authenticate, paramsIdValidate, getStream);
 
-router.get('/:id/user', paramsIdValidate, getUserByStreamId);
-router.get('/:id/episode', paramsIdValidate, getEpisodeByStreamId);
-router.get('/:id/episode/season', paramsIdValidate, getSeasonOfEpisodeByStreamId);
-router.get('/:id/episode/season/series', paramsIdValidate, getSeriesOfSeasonEpisodeByStreamId);
-router.get('/:id/episode/season/series/genre', paramsIdValidate, getGenresOfSeriesOfSeasonEpisodeByStreamId);
+router.get('/:id/user', authenticate, paramsIdValidate, getUserByStreamId);
+router.get('/:id/episode', authenticate, paramsIdValidate, getEpisodeByStreamId);
+router.get('/:id/episode/season', authenticate, paramsIdValidate, getSeasonOfEpisodeByStreamId);
+router.get('/:id/episode/season/series', authenticate, paramsIdValidate, getSeriesOfSeasonEpisodeByStreamId);
+router.get('/:id/episode/season/series/genre', authenticate, paramsIdValidate, getGenresOfSeriesOfSeasonEpisodeByStreamId);
 
 
-router.patch('/:id', paramsIdValidate, validate(streamValidation.update.bodySchema), updateStream);
-router.delete('/:id', paramsIdValidate, deleteStream);
+router.patch('/:id', authenticate, paramsIdValidate, validate(streamValidation.update.bodySchema), updateStream);
+router.delete('/:id', authenticate, paramsIdValidate, deleteStream);
 
 export default router;

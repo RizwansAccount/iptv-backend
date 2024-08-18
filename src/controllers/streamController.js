@@ -351,11 +351,7 @@ const getGenresOfSeriesOfSeasonEpisodeByStreamId =async(req, res)=>{
             }
 
         ]);
-        if(data?.length > 0) {
-            getResponseSuccess({res, data : data?.[0], message : 'get season by stream id successfully!'})
-        } else  {
-            res.json({success : true, message : 'genres does not exist'})
-        }
+        getResponseSuccess({res, data : data?.[0] ?? { streams : [] }, message : 'get season by stream id successfully!'})
     } catch ({message}) {
         errorResponse({res, message});
     }

@@ -154,10 +154,8 @@ const getAllSeasonsByGenreId = async (req, res) => {
                 }
             }
         ]);
-        
-        const seasons = data.length > 0 ? data[0].seasons : [];
-        
-        getResponseSuccess({res, data: { seasons }, message: 'All seasons of genre fetched successfully!'})
+                
+        getResponseSuccess({res, data: data?.[0]?.seasons || { seasons : [] }, message: 'All seasons of genre fetched successfully!'})
     } catch ({message}) {
         errorResponse({res, message})
     }

@@ -8,7 +8,7 @@ const schemaStructure = {
     is_deleted : { type : Boolean, default : false }
 };
 
-const schema = new mongoose.Schema(schemaStructure);
+const schema = new mongoose.Schema(schemaStructure, { timestamps : true });
 const model = mongoose.model('Series', schema);
 
 export default model;

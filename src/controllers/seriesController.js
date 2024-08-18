@@ -82,11 +82,8 @@ const getAllSeasonsBySeriesId =async(req, res)=>{
                 }
             }
         ]);
-        if(data?.length > 0) {
-            getResponseSuccess({res, data : data?.[0], message : 'all seasons fetch successfully by series id'})
-        } else  {
-            res.json({ success : true, message : 'seasons does not exist' })
-        }
+        getResponseSuccess({res, data : data?.[0] || { seasons : [] }, message : 'all seasons fetch successfully by series id'})
+       
     } catch ({message}) {
         errorResponse({res, message})
     }

@@ -7,7 +7,7 @@ const schemaStructure = {
     is_deleted : { type : Boolean, default : false }
 };
 
-const schema = new mongoose.Schema(schemaStructure);
+const schema = new mongoose.Schema(schemaStructure, { timestamps : true });
 const model = mongoose.model('Season', schema);
 
 export default model;

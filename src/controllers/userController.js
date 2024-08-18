@@ -111,8 +111,9 @@ const getUserAllStreams =async(req, res)=>{
                 }
             }
         ]);
+
+        getResponseSuccess({res, data : data?.[0]??[], message : 'user all streams fetch successfully!'});
     
-        getResponseSuccess({res, data : data?.[0], message : 'user all streams fetch successfully!'});
     } catch ({message}) {
         errorResponse({res, message})
     }
@@ -155,11 +156,7 @@ const getUserStreamByStreamId =async(req, res)=>{
                 }
             }
         ]);
-        if(data?.length > 0) {
-            getResponseSuccess({res, data : data?.[0], message : 'get stream of a user fetch successfully!'})
-        } else {
-            res.json({success : true, message : 'stream does not exist'})
-        }
+        getResponseSuccess({res, data : data?.[0] || { stream : {} }, message : 'get stream of a user fetch successfully!'})
     } catch ({message}) {
         errorResponse({res, message})
     }
