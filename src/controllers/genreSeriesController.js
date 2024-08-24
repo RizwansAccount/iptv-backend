@@ -11,6 +11,15 @@ const createGenreSeries =async(req, res)=>{
     }
 };
 
+const getAllGenreSeries =async(req, res)=>{
+    try {
+        const data = await genreSeriesModel.find({ is_deleted : false }, { is_deleted : 0, __v : 0 });
+        getResponseSuccess({res, data})
+    } catch ({message}) {
+        errorResponse({res, message})
+    }
+};
+
 const getGenreSeries =async(req, res)=>{
     try {
         const id = req.params.id;
@@ -56,4 +65,4 @@ const deleteGenreSeries =async(req, res)=>{
     }
 };
 
-export { createGenreSeries, getGenreSeries, updateGenreSeries, deleteGenreSeries  };
+export { createGenreSeries, getGenreSeries, updateGenreSeries, deleteGenreSeries, getAllGenreSeries  };

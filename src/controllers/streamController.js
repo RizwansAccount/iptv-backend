@@ -91,6 +91,9 @@ const getEpisodeByStreamId =async(req, res)=>{
                 $unwind : '$episode'
             },
             {
+                $match : {'episode.is_deleted' : false}
+            },
+            {
                 $project : {
                     episode : {
                         _id : '$episode._id',
@@ -103,7 +106,7 @@ const getEpisodeByStreamId =async(req, res)=>{
                 }
             }
         ]);
-        getResponseSuccess({res, data : data?.[0], message :'episode of this stream fetch successfully!'})
+        getResponseSuccess({res, data : data?.[0] ?? { episode : {} }, message :'episode of this stream fetch successfully!'})
     } catch ({message}) {
         errorResponse({res, message});
     }
@@ -175,58 +178,49 @@ const getSeriesOfSeasonEpisodeByStreamId =async(req, res)=>{
             {
                 $lookup : {
                     from : 'episodes',
-                    localField: 'episode_id',
+                    localField : 'episode_id',
                     foreignField : '_id',
-                    as : 'episode',
-                    pipeline: [
-                        {
+                    pipeline : [
+                       {
                             $match : { 'is_deleted' : false }
-                        },
-                        {
+                       },
+                       {
                             $lookup : {
                                 from : 'seasons',
                                 localField : 'season_id',
                                 foreignField : '_id',
-                                as : 'season'
+                                pipeline : [
+                                    {
+                                        $match : { 'is_deleted' : false }
+                                    },
+                                    {
+                                        $lookup : {
+                                            from : 'series',
+                                            localField : 'series_id',
+                                            foreignField : '_id',
+                                            as : 'series'
+                                        }
+                                    },
+                                ],
+                                as : 'season',
                             }
-                        },
-                        {
-                            $unwind : '$season'
-                        },
-                        {
-                            $project : {
-                                'is_deleted' : 0,
-                                '__v' : 0,
-                                'season.is_deleted' : 0,
-                                'season.__v' : 0,
-                            }
-                        }
-                    ]
-                }
+                       },
+                       {
+                        $unwind : '$season'
+                       }
+                    ],
+                    as : 'episode',
+                },
             },
             {
                 $unwind : '$episode'
             },
             {
                 $project : {
-                    season : '$episode.season',
+                    series : '$episode.season.series',
                     _id : 0
                 }
-            },
-            {
-                $lookup : {
-                    from : 'series',
-                    localField : 'season.series_id',
-                    foreignField : '_id',
-                    as : 'series'
-                }
-            },
-            {
-                $project : {
-                    series : '$series'
-                }
             }
-
         ]);
         getResponseSuccess({res, data : data?.[0] || { series : [] }, message : 'get season by stream id successfully!'})
     } catch ({message}) {
@@ -244,112 +238,105 @@ const getGenresOfSeriesOfSeasonEpisodeByStreamId =async(req, res)=>{
             {
                 $lookup : {
                     from : 'episodes',
-                    localField: 'episode_id',
+                    localField : 'episode_id',
                     foreignField : '_id',
-                    as : 'episode',
-                    pipeline: [
-                        {
+                    pipeline : [
+                       {
                             $match : { 'is_deleted' : false }
-                        },
-                        {
+                       },
+                       {
                             $lookup : {
                                 from : 'seasons',
                                 localField : 'season_id',
                                 foreignField : '_id',
-                                as : 'season'
+                                pipeline : [
+                                    {
+                                        $match : { 'is_deleted' : false }
+                                    },
+                                    {
+                                        $lookup : {
+                                            from : 'series',
+                                            localField : 'series_id',
+                                            foreignField : '_id',
+                                            pipeline : [
+                                                {
+                                                    $match : {'is_deleted' : false}
+                                                },
+                                                {
+                                                    $lookup : {
+                                                        from : 'genreseries',
+                                                        localField : '_id',
+                                                        foreignField: 'series_id',
+                                                        pipeline: [
+                                                            {
+                                                                $match : { 'is_deleted' : false }
+                                                            },
+                                                            {
+                                                                $lookup : {
+                                                                    from : 'genres',
+                                                                    localField: 'genre_id',
+                                                                    foreignField : '_id',
+                                                                    as : 'genres'
+                                                                }
+                                                            },
+                                                            {
+                                                                $unwind : '$genres'
+                                                            }
+                                                        ],
+                                                        as : 'genre-series',
+                                                    }
+                                                }
+                                            ],
+                                            as : 'series',
+                                        }
+                                    },
+                                ],
+                                as : 'season',
                             }
-                        },
-                        {
-                            $unwind : '$season'
-                        },
-                        {
-                            $project : {
-                                'is_deleted' : 0,
-                                '__v' : 0,
-                                'season.is_deleted' : 0,
-                                'season.__v' : 0,
-                            }
-                        }
-                    ]
-                }
+                       },
+                       {
+                        $unwind : '$season'
+                       }
+                    ],
+                    as : 'episode',
+                },
             },
             {
                 $unwind : '$episode'
             },
             {
+                $project : { 
+                    series : '$episode.season.series'
+                }
+            },
+            {
+                $unwind : '$series'
+            },
+            {
+                $unwind : '$series.genre-series'
+            },
+            {
+                $project: {
+                    genres: '$series.genre-series.genres',
+                }
+            },
+            {
+                $group : {
+                    _id : null,
+                    genres : {
+                        $push : {
+                            _id : '$genres._id',
+                            name : '$genres.name',
+                        }
+                    }
+                }
+            },
+            {
                 $project : {
-                    season : '$episode.season',
+                    genres : 1,
                     _id : 0
                 }
-            },
-            {
-                $lookup : {
-                    from : 'series',
-                    localField : 'season.series_id',
-                    foreignField : '_id',
-                    as : 'series'
-                }
-            },
-            {
-                $project : {
-                    series : '$series'
-                }
-            },
-            {
-                $lookup : {
-                    from : 'genreseries',
-                    localField: 'series._id',
-                    foreignField:'series_id',
-                    as : 'genre-series',
-                    pipeline : [
-                        {
-                            $lookup : {
-                                from : 'genres',
-                                localField: 'genre_id',
-                                foreignField : '_id',
-                                as : 'genres'
-                            }
-                        },
-                        {
-                            $unwind : '$genres'
-                        },
-                        {
-                            $project : {
-                                genres : {
-                                    '_id' : '$genres._id',
-                                    'name' : '$genres.name'
-                                },
-                                _id : 0
-                            }
-                        },
-                        {
-                            $group : {
-                                _id :  null,
-                                genres : {
-                                    $push : {
-                                        _id : '$genres._id',
-                                        name : '$genres.name',
-                                    }
-                                }
-                            }
-                        },
-                        {
-                            $project : {
-                                _id : 0
-                            }
-                        }
-                    ]
-                }
-            },
-            {
-                $unwind : '$genre-series'
-            },
-            {
-                $project : {
-                    genres : '$genre-series.genres'
-                }
             }
-
         ]);
         getResponseSuccess({res, data : data?.[0] || { genres : [] }, message : 'get genres by stream id successfully!'})
     } catch ({message}) {
