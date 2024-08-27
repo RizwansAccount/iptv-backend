@@ -1,4 +1,5 @@
 import express from 'express';
+import cors from 'cors';
 import dotenv from 'dotenv';
 import connectDB from './src/config/dbConnection.js';
 import userRouter from './src/routes/userRouter.js';
@@ -17,6 +18,7 @@ const port = process.env.PORT || 3000;
 
 app.use(express.json());
 app.use(express.urlencoded({ extended : true }));
+app.use(cors());
 
 connectDB();
 
