@@ -8,11 +8,24 @@ export default {
         }),
     },
 
+    email : {
+        bodySchema : Joi.object().keys({
+            email : Joi.string().required().email(),
+        }),
+    },
+
     idAndStreamId : {
         paramsSchema : Joi.object().keys({
             id : Joi.string().required(),
             streamId : Joi.string().required(),
         }),
+    },
+
+    verifyCode : {
+        bodySchema : Joi.object().keys({
+            email : Joi.string().required().email(),
+            verification_code : Joi.string().required(),
+        })
     },
 
     register : {

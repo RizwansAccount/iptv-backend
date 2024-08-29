@@ -2,8 +2,8 @@ import express from 'express';
 import validate from '../middlewares/validation.js';
 import { getFile, createFile, deleteFile, updateFile } from '../controllers/fileController.js';
 import fileValidation from '../validations/fileValidation.js';
-import uploadFile from '../config/uploadFile.js';
 import authenticate from '../middlewares/authenticate.js';
+import uploadFile from '../constants/uploadFile.js';
 
 const router = express.Router();
 

@@ -1,7 +1,7 @@
 import mongoose from "mongoose";
-import { deleteResponseSuccess, errorResponse, getResponseSuccess, postResponseSuccess, updateResponseSuccess } from "../config/responses.js";
+import { deleteResponseSuccess, errorResponse, getResponseSuccess, postResponseSuccess, updateResponseSuccess } from "../constants/responses.js";
 import seriesModel from '../models/seriesModel.js';
-import paginationPipeline from "../config/paginationPipeline.js";
+import paginationPipeline from "../constants/paginationPipeline.js";
 
 const createSeries =async(req, res)=>{
     try {

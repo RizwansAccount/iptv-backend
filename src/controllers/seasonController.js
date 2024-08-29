@@ -1,7 +1,7 @@
 import mongoose from "mongoose";
-import { deleteResponseSuccess, errorResponse, getResponseSuccess, postResponseSuccess, updateResponseSuccess } from "../config/responses.js";
+import { deleteResponseSuccess, errorResponse, getResponseSuccess, postResponseSuccess, updateResponseSuccess } from "../constants/responses.js";
 import seasonModel from '../models/seasonModel.js';
-import paginationPipeline from "../config/paginationPipeline.js";
+import paginationPipeline from "../constants/paginationPipeline.js";
 
 const createSeason =async(req, res)=>{
     try {

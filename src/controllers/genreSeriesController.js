@@ -1,4 +1,4 @@
-import { deleteResponseSuccess, errorResponse, getResponseSuccess, postResponseSuccess, updateResponseSuccess } from "../config/responses.js";
+import { deleteResponseSuccess, errorResponse, getResponseSuccess, postResponseSuccess, updateResponseSuccess } from "../constants/responses.js";
 import genreSeriesModel from '../models/genreSeriesModel.js';
 
 const createGenreSeries =async(req, res)=>{

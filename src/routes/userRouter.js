@@ -1,7 +1,7 @@
 import express from 'express';
 import validate from '../middlewares/validation.js';
 import userValidation from '../validations/userValidation.js';
-import { getUser, createUser, updateUser, deleteUser, loginUser, getAllUsers, getUserAllStreams,
+import { getUser, createUser, verifyUserAccount, resendCode, updateUser, deleteUser, loginUser, getAllUsers, getUserAllStreams,
     getUserStreamByStreamId, deleteUserStreamById
  } from '../controllers/userController.js';
 import authenticate from '../middlewares/authenticate.js';
@@ -9,6 +9,8 @@ import authenticate from '../middlewares/authenticate.js';
 const router = express.Router();
 
 router.post('/registration', validate(userValidation.register.bodySchema) ,createUser);
+router.post('/verify-code', validate(userValidation.verifyCode.bodySchema), verifyUserAccount);
+router.post('/resend-code', validate(userValidation.email.bodySchema), resendCode);
 router.post('/login', validate(userValidation.login.bodySchema), loginUser);
 
 router.get('/', authenticate, getAllUsers);

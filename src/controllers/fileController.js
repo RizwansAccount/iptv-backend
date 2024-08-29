@@ -1,4 +1,4 @@
-import { deleteResponseSuccess, errorResponse, getResponseSuccess, updateResponseSuccess } from "../config/responses.js";
+import { deleteResponseSuccess, errorResponse, getResponseSuccess, updateResponseSuccess } from "../constants/responses.js";
 import fileModal from '../models/fileModel.js';
 
 const createFile =async(req, res)=>{

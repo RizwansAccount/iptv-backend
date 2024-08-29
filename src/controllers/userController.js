@@ -1,9 +1,13 @@
-import { deleteResponseSuccess, errorResponse, getResponseSuccess, postResponseSuccess, updateResponseSuccess } from "../config/responses.js";
+import { deleteResponseSuccess, errorResponse, getResponseSuccess, postResponseSuccess, updateResponseSuccess } from "../constants/responses.js";
 import userModel from '../models/userModel.js';
 import streamModel from '../models/streamModel.js';
+import codeServiceModel from '../models/codeServiceModel.js';
 import passwordHash from "password-hash";
 import jwt from 'jsonwebtoken';
 import mongoose from "mongoose";
+import { getMailOptions, getRandomCode, transporterEmail } from "../constants/code-verification.js";
+
+const MessageService = transporterEmail();
 
 const getAllUsers = async(req, res)=>{
     try {
@@ -16,20 +20,69 @@ const getAllUsers = async(req, res)=>{
 
 const createUser =async(req, res)=>{
     try {
-        let { password } = req.body;
+        let { password, email } = req?.body;
+        password = passwordHash?.generate(password);
 
-        password = passwordHash.generate(password);
+        const isUserExist = userModel.findOne({email});
+        if(!isUserExist) {
+            const verification_code = getRandomCode();
 
-        const body = {...req.body, password};
+            await codeServiceModel.create({...req?.body, password, verification_code});
+    
+            const mailOptions = getMailOptions(email, verification_code);
+    
+            MessageService.sendMail(mailOptions, (error, info) => {
+                if (error) {
+                  return res.status(500).json({ message: 'Error sending verification email' });
+                }
+                res.json({ success : true, message: 'Please check your email for the verification code' });
+            });
+        } else {
+            errorResponse({res, message : 'user already exists!'})
+        }
 
-        const data = await userModel.create(body);
-
-        const { _id, first_name, last_name, email } = data;
-
-        postResponseSuccess({res, data : { _id, first_name, last_name, email}, message : 'user created successfully'});
 
     } catch ({message}) {
         errorResponse({res, message});
+    }
+};
+
+const resendCode =async(req, res)=>{
+    try {
+        const { email } = req.body;    
+        const verification_code = getRandomCode();
+    
+        await codeServiceModel.updateOne({email}, { verification_code });
+        
+        const mailOptions = getMailOptions(email, verification_code);
+    
+        MessageService.sendMail(mailOptions, (error, info) => {
+            if (error) {
+                return res.status(500).json({ message: 'Error sending verification email' });
+            }
+            res.json({ success : true, message: 'Please check your email for the verification code' });
+        });
+    } catch ({message}) {
+        errorResponse({res, message})
+    }
+}
+
+const verifyUserAccount =async(req, res)=>{
+    try {
+        const { email, verification_code } = req.body;
+        const userData = await codeServiceModel.findOne({email, verification_code});
+
+        if (userData?.verification_code != verification_code) {
+            return res.status(400).json({ message: 'Invalid verification code' });
+        };
+        const body = { first_name : userData?.first_name, last_name : userData?.last_name, email : userData?.email, password : userData?.password };
+        const data = await userModel.create(body);
+
+        await codeServiceModel.deleteOne({email, verification_code});
+        postResponseSuccess({res, data, message : 'Account created successfully!'})
+
+    } catch ({message}) {
+        errorResponse({res, message})
     }
 };
 
@@ -213,6 +266,6 @@ const deleteUserStreamById =async(req, res)=>{
     }
 };
 
-export { createUser, getUser, updateUser, deleteUser, loginUser, getAllUsers, getUserAllStreams,
+export { createUser, verifyUserAccount, resendCode, getUser, updateUser, deleteUser, loginUser, getAllUsers, getUserAllStreams,
     getUserStreamByStreamId, deleteUserStreamById
  };

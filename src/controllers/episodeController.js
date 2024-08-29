@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import { deleteResponseSuccess, errorResponse, getResponseSuccess, postResponseSuccess, updateResponseSuccess } from "../config/responses.js";
+import { deleteResponseSuccess, errorResponse, getResponseSuccess, postResponseSuccess, updateResponseSuccess } from "../constants/responses.js";
 import episodeModel from '../models/episodeModel.js';
 
 const createEpisode =async(req, res)=>{
