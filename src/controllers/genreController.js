@@ -16,7 +16,7 @@ const createGenre =async(req, res)=>{
 
 const getAllGenre =async(req, res)=>{
     try {
-        const data = await genreModel.find({ is_deleted : false }, { is_deleted : 0, __v : 0 });
+        const data = await genreModel.find();
         getResponseSuccess({res, data, message : 'all genre fetch successfully!'});
     } catch ({message}) {
         errorResponse({res, message})
@@ -164,13 +164,13 @@ const getAllSeasonsByGenreId = async (req, res) => {
 const updateGenre =async(req, res)=>{
     try {
         const id = req.params.id;
-        const isGenreExist = await genreModel.findOne({_id : id, is_deleted : false});
+        const isGenreExist = await genreModel.findOne({_id : id});
 
         if(!isGenreExist) {
             return errorResponse({res, message : 'genre does not exist!'})
         }
         
-        const data = await genreModel.findByIdAndUpdate(id, req.body).select('-is_deleted -__v');
+        const data = await genreModel.findByIdAndUpdate(id, req.body);
         updateResponseSuccess({res, data, message: 'genre updated successfully'});
 
     } catch ({message}) {

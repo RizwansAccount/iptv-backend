@@ -17,6 +17,7 @@ export default {
     update : {
         bodySchema : Joi.object().keys({
             name : Joi.string(),
+            is_deleted: Joi.boolean()
         })
     }
 };
