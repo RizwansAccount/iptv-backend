@@ -23,7 +23,7 @@ const createUser =async(req, res)=>{
         let { password, email } = req?.body;
         password = passwordHash?.generate(password);
 
-        const isUserExist = userModel.findOne({email});
+        const isUserExist = await userModel.findOne({email});
         if(!isUserExist) {
             const verification_code = getRandomCode();
 
