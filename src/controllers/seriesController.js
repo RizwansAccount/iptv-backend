@@ -17,7 +17,10 @@ const createSeries =async(req, res)=>{
 const getAllSeries =async(req, res)=>{
     try {
         const pipeline = paginationPipeline(req);
-        const data = await seriesModel.aggregate(pipeline);
+        let data = {};
+
+        if(pipeline?.length > 0) { data = await seriesModel.aggregate(pipeline); }
+        else { data = await seriesModel.find(); }
 
         getResponseSuccess({ res, data, message: 'all series fetch successfully' })
     } catch ({message}) {

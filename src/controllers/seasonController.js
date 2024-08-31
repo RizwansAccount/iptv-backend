@@ -17,7 +17,11 @@ const createSeason =async(req, res)=>{
 const getAllSeasons=async(req, res)=>{
     try {
         const pipeline = paginationPipeline(req);
-        const data = await seasonModel.aggregate(pipeline);
+        let data = {};
+
+        if(pipeline?.length > 0) { data = await seasonModel.aggregate(pipeline); }
+        else { data = await seasonModel.find(); }
+        
         getResponseSuccess({res, data, message : 'fetch all seasons successfully!'})
     } catch ({message}) {
         errorResponse({res, message})

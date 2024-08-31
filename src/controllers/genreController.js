@@ -2,41 +2,48 @@ import mongoose from "mongoose";
 import { deleteResponseSuccess, errorResponse, getResponseSuccess, postResponseSuccess, updateResponseSuccess } from "../constants/responses.js";
 import genreModel from '../models/genreModel.js';
 import genreSeriesModel from '../models/genreSeriesModel.js';
+import paginationPipeline from "../constants/paginationPipeline.js";
 
-const createGenre =async(req, res)=>{
+const createGenre = async (req, res) => {
     try {
         const data = await genreModel.create(req.body);
         const { _id, name } = data;
-        postResponseSuccess({res, data : { _id, name}, message : 'genre created successfully'});
+        postResponseSuccess({ res, data: { _id, name }, message: 'genre created successfully' });
 
-    } catch ({message}) {
-        errorResponse({res, message});
+    } catch ({ message }) {
+        errorResponse({ res, message });
     }
 };
 
-const getAllGenre =async(req, res)=>{
+const getAllGenre = async (req, res) => {
     try {
-        const data = await genreModel.find();
-        getResponseSuccess({res, data, message : 'all genre fetch successfully!'});
-    } catch ({message}) {
-        errorResponse({res, message})
+        const pipeline = paginationPipeline(req);
+        let data = {};
+
+        if (pipeline?.length > 0) { data = await genreModel.aggregate(pipeline); }
+        else { data = await genreModel.find(); }
+
+        getResponseSuccess({ res, data, message: 'all genre fetch successfully!' });
+        
+    } catch ({ message }) {
+        errorResponse({ res, message })
     }
 };
 
-const getGenre =async(req, res)=>{
+const getGenre = async (req, res) => {
     try {
         const id = req.params.id;
 
-        const data = await genreModel.findOne({ _id : id, is_deleted : false }, {is_deleted : 0, __v : 0});
+        const data = await genreModel.findOne({ _id: id, is_deleted: false }, { is_deleted: 0, __v: 0 });
 
-        if(!data) {
-            return errorResponse({res, message : 'genre does not exist!'})
+        if (!data) {
+            return errorResponse({ res, message: 'genre does not exist!' })
         }
 
-        getResponseSuccess({res, data, message : 'genre fetch successfully'});
+        getResponseSuccess({ res, data, message: 'genre fetch successfully' });
 
-    } catch ({message}) {
-        errorResponse({res, message});
+    } catch ({ message }) {
+        errorResponse({ res, message });
     }
 };
 
@@ -56,12 +63,12 @@ const getAllSeriesByGenreId = async (req, res) => {
                 }
             },
             {
-                $project : {
-                    series : {
-                        $filter : {
-                            input : '$series',
-                            as : 'series',
-                            cond : { $eq : [ '$$series.is_deleted', false ] }
+                $project: {
+                    series: {
+                        $filter: {
+                            input: '$series',
+                            as: 'series',
+                            cond: { $eq: ['$$series.is_deleted', false] }
                         }
                     }
                 }
@@ -90,10 +97,10 @@ const getAllSeriesByGenreId = async (req, res) => {
                 }
             }
         ]);
-        
-        getResponseSuccess({res, data: data?.[0] || { series : [] }, message: 'All series of genre fetched successfully!'})
-    } catch ({message}) {
-        errorResponse({res, message})
+
+        getResponseSuccess({ res, data: data?.[0] || { series: [] }, message: 'All series of genre fetched successfully!' })
+    } catch ({ message }) {
+        errorResponse({ res, message })
     }
 };
 
@@ -141,51 +148,51 @@ const getAllSeasonsByGenreId = async (req, res) => {
             {
                 $project: {
                     seasons: {
-                        $map : {
-                            input : '$seasons',
-                            as : 'season',
-                            in : {
-                                '_id' : '$$season._id',
-                                'name' : '$$season.name',
-                                'description' : '$$season.description',
+                        $map: {
+                            input: '$seasons',
+                            as: 'season',
+                            in: {
+                                '_id': '$$season._id',
+                                'name': '$$season.name',
+                                'description': '$$season.description',
                             }
                         }
                     }
                 }
             }
         ]);
-                
-        getResponseSuccess({res, data: data?.[0]?.seasons || { seasons : [] }, message: 'All seasons of genre fetched successfully!'})
-    } catch ({message}) {
-        errorResponse({res, message})
+
+        getResponseSuccess({ res, data: data?.[0]?.seasons || { seasons: [] }, message: 'All seasons of genre fetched successfully!' })
+    } catch ({ message }) {
+        errorResponse({ res, message })
     }
 };
 
-const updateGenre =async(req, res)=>{
+const updateGenre = async (req, res) => {
     try {
         const id = req.params.id;
-        const isGenreExist = await genreModel.findOne({_id : id});
+        const isGenreExist = await genreModel.findOne({ _id: id });
 
-        if(!isGenreExist) {
-            return errorResponse({res, message : 'genre does not exist!'})
+        if (!isGenreExist) {
+            return errorResponse({ res, message: 'genre does not exist!' })
         }
-        
-        const data = await genreModel.findByIdAndUpdate(id, req.body);
-        updateResponseSuccess({res, data, message: 'genre updated successfully'});
 
-    } catch ({message}) {
-        errorResponse({res, message});
+        const data = await genreModel.findByIdAndUpdate(id, req.body);
+        updateResponseSuccess({ res, data, message: 'genre updated successfully' });
+
+    } catch ({ message }) {
+        errorResponse({ res, message });
     }
 };
 
-const deleteGenre =async(req, res)=>{
+const deleteGenre = async (req, res) => {
     try {
         const id = req.params.id;
-        await genreModel.findByIdAndUpdate(id, { is_deleted : true });
-        deleteResponseSuccess({res, message: 'genre deleted successfully'});
+        await genreModel.findByIdAndUpdate(id, { is_deleted: true });
+        deleteResponseSuccess({ res, message: 'genre deleted successfully' });
 
-    } catch ({message}) {
-        errorResponse({res, message});
+    } catch ({ message }) {
+        errorResponse({ res, message });
     }
 };
 
