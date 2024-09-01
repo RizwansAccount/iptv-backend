@@ -3,8 +3,8 @@ import fileModal from '../models/fileModel.js';
 
 const createFile =async(req, res)=>{
     try {
-        if (!req.file) { return res.status(400).send("File does not exist."); }
         const file = req?.file;
+        if (!file) { return res.status(400).send("File does not exist."); }
         const body = {
             original_name : file?.originalname,
             current_name : file?.filename,
@@ -12,11 +12,22 @@ const createFile =async(req, res)=>{
             path : file?.path,
             size : file?.size,
         };
+        const downloadLink = `${req.protocol}://${req.get("host")}/${file.path}`;
         await fileModal.create(body);
-        res.json({success : true, message : 'File upload successfully!'});
+        res.json({success : true, data : downloadLink, message:'File upload successfully!'});
 
     } catch ({message}) {
         errorResponse({res, message});
+    }
+};
+
+const getAllFiles = async(req, res)=>{
+    try {
+        const data = await fileModal.find();
+        getResponseSuccess({res, data, message : 'file fetch successfully'});
+
+    } catch ({message}) {
+        errorResponse({res, message})
     }
 };
 
@@ -69,4 +80,4 @@ const deleteFile =async(req, res)=>{
     }
 };
 
-export { createFile, getFile, deleteFile, updateFile };
+export { createFile, getFile, deleteFile, updateFile, getAllFiles };

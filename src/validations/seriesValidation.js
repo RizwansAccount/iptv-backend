@@ -23,6 +23,7 @@ export default {
             description: Joi.string(),
             tailer_id : Joi.string(),
             thumbnail_id : Joi.string(),
+            is_deleted: Joi.boolean()
         })
     }
 };

@@ -161,11 +161,11 @@ const getAllEpisodesBySeriesId =async(req, res)=>{
 const updateSeries =async(req, res)=>{
     try {
         const id = req.params.id;
-        const isSeriesExist = await seriesModel.findOne({_id : id, is_deleted : false});
+        const isSeriesExist = await seriesModel.findOne({_id : id });
         if(!isSeriesExist) {
             return errorResponse({res, message : 'series does not exist!'})
         }
-        const data = await seriesModel.findByIdAndUpdate(id, req.body).select('-is_deleted -__v');
+        const data = await seriesModel.findByIdAndUpdate(id, req.body);
         updateResponseSuccess({res, data, message: 'series updated successfully'});
     } catch ({message}) {
         errorResponse({res, message});

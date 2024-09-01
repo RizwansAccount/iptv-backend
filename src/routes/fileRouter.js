@@ -1,6 +1,6 @@
 import express from 'express';
 import validate from '../middlewares/validation.js';
-import { getFile, createFile, deleteFile, updateFile } from '../controllers/fileController.js';
+import { getFile, createFile, deleteFile, updateFile, getAllFiles } from '../controllers/fileController.js';
 import fileValidation from '../validations/fileValidation.js';
 import authenticate from '../middlewares/authenticate.js';
 import uploadFile from '../constants/uploadFile.js';
@@ -8,6 +8,8 @@ import uploadFile from '../constants/uploadFile.js';
 const router = express.Router();
 
 router.post('/', authenticate, uploadFile.single("file"), createFile);
+
+router.get('/', authenticate, getAllFiles);
 
 router.patch('/:id', authenticate, validate(fileValidation.id.paramsSchema, 'params'), uploadFile.single("file"), updateFile);
 
