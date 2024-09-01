@@ -12,9 +12,8 @@ const createFile =async(req, res)=>{
             path : file?.path,
             size : file?.size,
         };
-        const downloadLink = `${req.protocol}://${req.get("host")}/${file.path}`;
-        await fileModal.create(body);
-        res.json({success : true, data : downloadLink, message:'File upload successfully!'});
+        const data = await fileModal.create(body);
+        res.json({success : true, data, message:'File upload successfully!'});
 
     } catch ({message}) {
         errorResponse({res, message});
