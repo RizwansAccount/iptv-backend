@@ -21,6 +21,7 @@ export default {
             name : Joi.string(),
             series_id : Joi.string(),
             description : Joi.string(),
+            is_deleted : Joi.boolean()
         })
     }
 };

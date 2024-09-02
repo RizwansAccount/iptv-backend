@@ -98,13 +98,13 @@ const getAllEpisodesBySeasonId =async(req, res)=>{
 const updateSeason =async(req, res)=>{
     try {
         const id = req.params.id;
-        const isSeasonExist = await seasonModel.findOne({_id : id, is_deleted : false});
+        const isSeasonExist = await seasonModel.findOne({_id : id });
 
         if(!isSeasonExist) {
             return errorResponse({res, message : 'season does not exist!'})
         }
         
-        const data = await seasonModel.findByIdAndUpdate(id, req.body).select('-is_deleted -__v');
+        const data = await seasonModel.findByIdAndUpdate(id, req.body);
         updateResponseSuccess({res, data, message: 'season updated successfully'});
 
     } catch ({message}) {
