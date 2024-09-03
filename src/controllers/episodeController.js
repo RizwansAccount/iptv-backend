@@ -1,6 +1,7 @@
 import mongoose from "mongoose";
 import { deleteResponseSuccess, errorResponse, getResponseSuccess, postResponseSuccess, updateResponseSuccess } from "../constants/responses.js";
 import episodeModel from '../models/episodeModel.js';
+import paginationPipeline from "../constants/paginationPipeline.js";
 
 const createEpisode =async(req, res)=>{
     try {
@@ -15,7 +16,12 @@ const createEpisode =async(req, res)=>{
 
 const getAllEpisodes=async(req, res)=>{
     try {
-        const data = await episodeModel.find({ is_deleted : false }, { is_deleted : 0, __v : 0 });
+        const pipeline = paginationPipeline(req);
+        let data = {};
+
+        if (pipeline?.length > 0) { data = await episodeModel.aggregate(pipeline); }
+        else { data = await episodeModel.find(); }
+
         getResponseSuccess({ res, data, message:'all episodes successfully!' });
     } catch ({message}) {
         errorResponse({res, message})
@@ -91,13 +97,13 @@ const getAllStreamsByEpisodeId = async (req, res) => {
 const updateEpisode =async(req, res)=>{
     try {
         const id = req.params.id;
-        const isEpisodeExist = await episodeModel.findOne({_id : id, is_deleted : false});
+        const isEpisodeExist = await episodeModel.findOne({_id : id});
 
         if(!isEpisodeExist) {
             return errorResponse({res, message : 'episode does not exist!'})
         }
         
-        const data = await episodeModel.findByIdAndUpdate(id, req.body).select('-is_deleted -__v');
+        const data = await episodeModel.findByIdAndUpdate(id, req.body);
         updateResponseSuccess({res, data, message: 'episode updated successfully'});
 
     } catch ({message}) {
