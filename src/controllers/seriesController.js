@@ -64,26 +64,10 @@ const getAllSeasonsBySeriesId =async(req, res)=>{
                             as : 'season',
                             cond : { $eq : [ '$$season.is_deleted', false ] }
                         }
-                    }
+                    },
+                    _id : 0
                 }
             },
-            {
-                $project : {
-                    seasons: {
-                        $map: {
-                            input: '$seasons',
-                            as: 'season',
-                            in: {
-                                _id: '$$season._id',
-                                name: '$$season.name',
-                                description: '$$season.description',
-                                series_id: '$$season.series_id'
-                            }
-                        }
-                    },
-                    '_id' : 0
-                }
-            }
         ]);
         getResponseSuccess({res, data : data?.[0] || { seasons : [] }, message : 'all seasons fetch successfully by series id'})
        
