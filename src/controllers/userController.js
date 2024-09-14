@@ -150,22 +150,6 @@ const getUserAllStreams =async(req, res)=>{
                     },
                     _id : 0
                 }
-            },
-            {
-                $project : {
-                   streams : {
-                    $map : {
-                        input : '$streams',
-                        as : 'stream',
-                        in : {
-                            '_id' : '$$stream._id',
-                            'episode_id' : '$$stream.episode_id',
-                            'user_id' : '$$stream.user_id',
-                            'time' : '$$stream.time'
-                        }
-                    }
-                   }
-                }
             }
         ]);
 
