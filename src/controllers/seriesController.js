@@ -124,8 +124,6 @@ const getAllEpisodesBySeriesId =async(req, res)=>{
                             _id: '$episodes._id',
                             name: '$episodes.name',
                             description: '$episodes.description',
-                            season_id: '$seasons._id',
-                            season_name: '$seasons.name'
                         }
                     }
                 }
